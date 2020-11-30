@@ -1,0 +1,100 @@
+﻿@page "/counter"
+@using System.Diagnostics
+@using System.Threading
+@inject NavigationManager Nav
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject Services.BlazorTimer Timer
+
+<h1 class="text-center">Olá</h1>
+
+<h1 class="text-center">
+    <button class="btn btn-outline-success rounded-circle btn-jogo" @onclick="Iniciar">@Mensagem</button>
+</h1>
+<br />
+<h1 class="text-center text-secondary">@TempoMin:@TempoSec:@TempoMili</h1>
+
+
+<button class="btn btn-danger btn-block" @onclick="Cancelar">Iniciar Jogo</button>
+
+
+@code {
+    private int currentCount = 0;
+    private string Mensagem = "Começar";
+    private string TempoMin = "00";
+    private string TempoSec = "00";
+    private string TempoMili = "00";
+    private Stopwatch cronometro = new Stopwatch();
+
+
+
+    private void Cancelar()
+    {
+        Nav.NavigateTo("/counter");
+    }
+
+    async void Iniciar()
+    {
+        var letras = await LocalStorage.GetItemAsync<string>("jogo");
+        
+
+
+        for (int i = 0; i < 28; i++)
+        {
+            var letra = GerarLetra();
+            Mensagem = letra;
+
+
+
+
+
+            if (!string.IsNullOrEmpty(letras))
+            {
+                if (letras.Contains(letra)) continue;
+                letras = $"{letras} {letra}";
+                await LocalStorage.SetItemAsync("jogo", letras);
+                return;
+            }
+            else
+            {
+                await LocalStorage.SetItemAsync("jogo", letra);
+                return;
+
+            }
+
+        }
+        Task.Run(StartTimer);
+
+        Mensagem = "Fim de jogo";
+
+    }
+
+    string GerarLetra()
+    {
+        var random = new Random();
+
+        var flt = random.NextDouble();
+        var shift = Convert.ToInt32(Math.Floor(25 * flt));
+        return Convert.ToChar(shift + 65).ToString();
+    }
+
+    private void StartTimer()
+    {
+        currentCount = 0;
+        Timer.SetTimer(1000);
+        Timer.OnElapsed += TimerElapsedHandler;
+        Console.WriteLine("Timer Started.");
+    }
+
+
+    private void TimerElapsedHandler()
+    {
+        currentCount = currentCount + 1000;
+        TempoMin = currentCount.ToString();
+        StateHasChanged();
+        if (currentCount >= 5000)
+        {
+            Timer.EndTimer();
+            Console.WriteLine("Acabou.");
+        }
+    }
+}

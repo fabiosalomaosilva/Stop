@@ -1,0 +1,30 @@
+﻿@inherits LayoutComponentBase
+
+<div>
+    <NavMenu />
+    <div class="content">
+        @Body
+
+    </div>
+    <div class="footer">
+        <div class="content">
+
+            <div class="row" style="margin: -10px;">
+                <div class="col-6" style="margin: 0;">
+                    <NavLink href="/" Match="NavLinkMatch.All">
+                        <p class="text-center" style="margin: 0;"> <img src="/settings-black-36dp.svg" /></p>
+                        <p class="text-center font-weight-bold" style="margin: 0;">Config</p>
+                    </NavLink>
+                </div>
+                <div class="col-6" style="margin: 0;">
+                    <NavLink href="/counter" Match="NavLinkMatch.All">
+                            <p class="text-center" style="margin: 0;"> <img src="/alarm-black-36dp.svg" /></p>
+                            <p class="text-center font-weight-bold" style="margin: 0;">Tempo</p>
+                    </NavLink>
+                    
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

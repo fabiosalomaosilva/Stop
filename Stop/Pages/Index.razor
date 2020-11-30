@@ -1,0 +1,23 @@
+﻿@page "/"
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject NavigationManager Nav
+
+<h1 class="text-center">Olá</h1>
+
+<h4 class="text-center">Selecione o tempo de jogo</h4>
+
+<div class="form-group">
+    <label for="tempo">Tempo em minutos</label>
+    <input type="number" class="form-control" id="tempo" aria-describedby="Tempo de jogo">
+    <small id="emailHelp" class="form-text text-muted">Qual o tempo para cada rodada.</small>
+</div>
+<button type="submit" class="btn btn-primary btn-block" @onclick="Iniciar">Iniciar Jogo</button>
+
+@code
+{
+    private async void Iniciar()
+    {
+        await LocalStorage.SetItemAsync("jogo", "");
+        Nav.NavigateTo("/counter");
+    }
+}
