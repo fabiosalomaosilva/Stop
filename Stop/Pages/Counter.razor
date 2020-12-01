@@ -8,13 +8,13 @@
 
 <h1 class="text-center">Olá</h1>
 
-<h1 class="text-center">
+<p class="text-center">
     <button class="btn btn-outline-success rounded-circle btn-jogo" @onclick="Iniciar">@Mensagem</button>
-</h1>
-<h1 class="text-center text-secondary">@TempoMin:@TempoSec</h1>
+</p>
+<h1 class="text-center text-secondary" style="font-size:50px">@TempoMin:@TempoSec</h1>
 <h1 class="badge-danger text-center @BtnStatus">@Status</h1>
-<button class="btn btn-danger btn-block @BtnStop" @onclick="Stop">STOP</button>
-<br />
+<button class="btn btn-danger btn-block @BtnStop" @onclick="Stop">Stop</button>
+<button class="btn btn-warning btn-block @BtnFinalizar" @onclick="Finalizar">Finalizar Rodada</button>
 <button class="btn btn-outline-secondary btn-block" @onclick="Cancelar">Recomeçar o Jogo</button>
 
 
@@ -25,20 +25,21 @@
     private string TempoSec = "00";
     private string TempoMili = "00";
     private string Status = "";
-    private string BtnStatus = "hide";
-    private string BtnStop = "show";
+    private string BtnStatus = "d-none";
+    private string BtnStop = "d-none";
+    private string BtnFinalizar = "d-none";
+    private TimeSpan _timeLeft;
 
     protected override void OnInitialized()
     {
         if (Utils.Tempo <= 0)
         {
             Nav.NavigateTo("/");
-        }
-        ;
+        };
+
         base.OnInitialized();
     }
 
-    TimeSpan _timeLeft = new TimeSpan(0, 0, Utils.Tempo);
 
     private void Cancelar()
     {
@@ -48,17 +49,17 @@
     async void Iniciar()
     {
         var letras = await LocalStorage.GetItemAsync<string>("jogo");
+        Status = "Stop";
+        BtnStatus = "d-none";
+        BtnStop = "d-block";
+        BtnFinalizar = "d-block";
 
-
+        _timeLeft = new TimeSpan(0, Utils.Tempo, 0);
 
         for (int i = 0; i < 28; i++)
         {
             var letra = GerarLetra();
             Mensagem = letra;
-
-
-
-
 
             if (!string.IsNullOrEmpty(letras))
             {
@@ -100,7 +101,10 @@
             currentCount = _timeLeft.Seconds;
             TempoMin = _timeLeft.Minutes.ToString("00");
             TempoSec = _timeLeft.Seconds.ToString("00");
-
+            if (_timeLeft.Minutes == 0)
+            {
+                BtnStop = "d-none";
+            }
             StateHasChanged();
         }
 
@@ -111,20 +115,33 @@
     }
     Task AfterTime()
     {
-        Status = "ACABOU O JOGO";
-        BtnStatus = "show";
-        BtnStop = "hide";
-        _timeLeft = new TimeSpan(0, 0, 15);
+        Status = "Rodada Encerrada";
+        BtnStatus = "d-block";
+        BtnStop = "d-none";
+        BtnFinalizar = "d-none";
+        _timeLeft = new TimeSpan(0, 0, 0);
+        return Task.CompletedTask;
+    }
+
+    Task Finalizar()
+    {
+        Status = "Rodada Encerrada";
+        BtnStatus = "d-block";
+        BtnStop = "d-none";
+        BtnFinalizar = "d-none";
+        _timeLeft = new TimeSpan(0, 0, 1);
         return Task.CompletedTask;
     }
 
     Task Stop()
     {
-        Status = "ACABOU O JOGO";
-        BtnStatus = "hide";
-        _timeLeft = new TimeSpan(0, 0, 0);
+        if (_timeLeft.Minutes > 0)
+        {
+            _timeLeft = new TimeSpan(0, 1, 0);
+        }
+        BtnStatus = "d-none";
+        BtnStop = "d-none";
+        BtnFinalizar = "d-block";
         return Task.CompletedTask;
     }
-
-
 }
