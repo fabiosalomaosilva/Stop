@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Stop.Services
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject NavigationManager Nav
 
@@ -8,15 +9,17 @@
 
 <div class="form-group">
     <label for="tempo">Tempo em minutos</label>
-    <input type="number" class="form-control" id="tempo" aria-describedby="Tempo de jogo">
+    <input type="number" class="form-control" id="tempo" aria-describedby="Tempo de jogo" @bind="Tempo">
     <small id="emailHelp" class="form-text text-muted">Qual o tempo para cada rodada.</small>
 </div>
 <button type="submit" class="btn btn-primary btn-block" @onclick="Iniciar">Iniciar Jogo</button>
 
 @code
 {
+    private int Tempo;
     private async void Iniciar()
     {
+        Utils.Tempo = Tempo;
         await LocalStorage.SetItemAsync("jogo", "");
         Nav.NavigateTo("/counter");
     }

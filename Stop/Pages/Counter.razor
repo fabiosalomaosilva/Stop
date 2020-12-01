@@ -1,6 +1,7 @@
 ﻿@page "/counter"
 @using System.Diagnostics
 @using System.Threading
+@using Stop.Services
 @inject NavigationManager Nav
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject Services.BlazorTimer Timer
@@ -10,11 +11,11 @@
 <h1 class="text-center">
     <button class="btn btn-outline-success rounded-circle btn-jogo" @onclick="Iniciar">@Mensagem</button>
 </h1>
+<h1 class="text-center text-secondary">@TempoMin:@TempoSec</h1>
+<h1 class="badge-danger text-center @BtnStatus">@Status</h1>
+<button class="btn btn-danger btn-block @BtnStop" @onclick="Stop">STOP</button>
 <br />
-<h1 class="text-center text-secondary">@TempoMin:@TempoSec:@TempoMili</h1>
-
-
-<button class="btn btn-danger btn-block" @onclick="Cancelar">Iniciar Jogo</button>
+<button class="btn btn-outline-secondary btn-block" @onclick="Cancelar">Recomeçar o Jogo</button>
 
 
 @code {
@@ -23,19 +24,31 @@
     private string TempoMin = "00";
     private string TempoSec = "00";
     private string TempoMili = "00";
-    private Stopwatch cronometro = new Stopwatch();
+    private string Status = "";
+    private string BtnStatus = "hide";
+    private string BtnStop = "show";
 
+    protected override void OnInitialized()
+    {
+        if (Utils.Tempo <= 0)
+        {
+            Nav.NavigateTo("/");
+        }
+        ;
+        base.OnInitialized();
+    }
 
+    TimeSpan _timeLeft = new TimeSpan(0, 0, Utils.Tempo);
 
     private void Cancelar()
     {
-        Nav.NavigateTo("/counter");
+        Nav.NavigateTo("/");
     }
 
     async void Iniciar()
     {
         var letras = await LocalStorage.GetItemAsync<string>("jogo");
-        
+
 
 
         for (int i = 0; i < 28; i++)
@@ -52,17 +65,18 @@
                 if (letras.Contains(letra)) continue;
                 letras = $"{letras} {letra}";
                 await LocalStorage.SetItemAsync("jogo", letras);
+                await Task.Run(StartTimer);
                 return;
             }
             else
             {
                 await LocalStorage.SetItemAsync("jogo", letra);
+                await Task.Run(StartTimer);
                 return;
 
             }
 
         }
-        Task.Run(StartTimer);
 
         Mensagem = "Fim de jogo";
 
@@ -77,24 +91,40 @@
         return Convert.ToChar(shift + 65).ToString();
     }
 
-    private void StartTimer()
+    private async Task StartTimer()
     {
-        currentCount = 0;
-        Timer.SetTimer(1000);
-        Timer.OnElapsed += TimerElapsedHandler;
-        Console.WriteLine("Timer Started.");
-    }
-
-
-    private void TimerElapsedHandler()
-    {
-        currentCount = currentCount + 1000;
-        TempoMin = currentCount.ToString();
-        StateHasChanged();
-        if (currentCount >= 5000)
+        while (_timeLeft > new TimeSpan())
         {
-            Timer.EndTimer();
-            Console.WriteLine("Acabou......");
+            await Task.Delay(1000);
+            _timeLeft = _timeLeft.Subtract(new TimeSpan(0, 0, 1));
+            currentCount = _timeLeft.Seconds;
+            TempoMin = _timeLeft.Minutes.ToString("00");
+            TempoSec = _timeLeft.Seconds.ToString("00");
+
+            StateHasChanged();
         }
+
+
+        await AfterTime();
+        StateHasChanged();
+
     }
+    Task AfterTime()
+    {
+        Status = "ACABOU O JOGO";
+        BtnStatus = "show";
+        BtnStop = "hide";
+        _timeLeft = new TimeSpan(0, 0, 15);
+        return Task.CompletedTask;
+    }
+
+    Task Stop()
+    {
+        Status = "ACABOU O JOGO";
+        BtnStatus = "hide";
+        _timeLeft = new TimeSpan(0, 0, 0);
+        return Task.CompletedTask;
+    }
+
+
 }

@@ -5,27 +5,12 @@ namespace Stop.Services
 {
     public class BlazorTimer
     {
-        private Timer _timer;
+        public int Tempo { get; set; }
 
-        public void SetTimer(double interval)
-        {
-            _timer = new Timer(interval);
-            _timer.Elapsed += NotifyTimerElapsed;
-            _timer.Enabled = true;
-        }
+    }
+    public static class Utils
+    {
+        public static int Tempo { get; set; }
 
-        public void EndTimer()
-        {
-            _timer.Stop();
-            _timer.Close();
-        }
-
-        public event Action OnElapsed;
-
-        private void NotifyTimerElapsed(Object source, ElapsedEventArgs e)
-        {
-            OnElapsed?.Invoke();
-            _timer.Dispose();
-        }
     }
 }
