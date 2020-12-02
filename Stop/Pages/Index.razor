@@ -6,12 +6,21 @@
 <h1 class="text-center">Olá</h1>
 
 <h4 class="text-center">Selecione o tempo de jogo</h4>
+<br />
+<label for="tempo">Tempo em minutos</label>
+    <div class="d-flex flex-row">
+            <button type="submit" class="btn btn-primary mr-1" style="width: 50px; height: 38px; font-size: 22px; padding-top: 2px;" @onclick="Diminuir">-</button>
 
-<div class="form-group">
-    <label for="tempo">Tempo em minutos</label>
-    <input type="number" class="form-control" id="tempo" aria-describedby="Tempo de jogo" @bind="Tempo" min="1" max="10">
-    <small id="emailHelp" class="form-text text-muted">Qual o tempo para cada rodada.</small>
-</div>
+            <input type="number" class="form-control" id="tempo" aria-describedby="Tempo de jogo" @bind="Tempo" min="1" max="10">
+
+            <button type="submit" class="btn btn-primary ml-1" style="width: 50px; height: 38px; font-size: 22px; padding-top: 2px;" @onclick="Adicionar">+</button>
+
+    </div>
+
+
+<br />
+<br />
+
 <button type="submit" class="btn btn-primary btn-block" @onclick="Iniciar">Iniciar Jogo</button>
 
 @code
@@ -22,5 +31,20 @@
         Utils.Tempo = Tempo;
         await LocalStorage.SetItemAsync("jogo", "");
         Nav.NavigateTo("/counter");
+    }
+
+    void Adicionar()
+    {
+        if (Tempo < 10)
+        {
+            Tempo++;
+        }
+    }
+    void Diminuir()
+    {
+        if (Tempo > 1)
+        {
+            Tempo--;
+        }
     }
 }
